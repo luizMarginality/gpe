@@ -1,0 +1,10 @@
+{
+  "name": "Presença GPE",
+  "short_name": "GPE Presença",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#12355b",
+  "description": "Controle mensal de presença de professores e voluntários do GPE.",
+  "icons": []
+}
