@@ -3,207 +3,448 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#12355b" />
-  <title>Presença GPE</title>
+  <meta name="theme-color" content="#7f1020" />
+  <meta name="description" content="Aplicativo para registrar e estimar o consumo de álcool." />
+  <title>Meu Consumo</title>
+
   <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍷</text></svg>" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <div id="toast" class="toast"></div>
-
-  <section id="loginView" class="login-view">
-    <form id="loginForm" class="login-card">
-      <div class="brand-mark">GPE</div>
-      <h1>Presença GPE</h1>
-      <p>Controle mensal de professores e voluntários.</p>
-      <label>E-mail
-        <input id="loginEmail" type="email" value="admin@gpe.org.br" required />
-      </label>
-      <label>Senha
-        <input id="loginPassword" type="password" value="123456" required />
-      </label>
-      <button type="submit" class="btn primary full">Entrar</button>
-      <small>Acesso de demonstração: admin@gpe.org.br / 123456</small>
-    </form>
-  </section>
-
-  <div id="appView" class="app hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark small">GPE</div>
-        <div><strong>Presença GPE</strong><span>Grupo Pró Estudar</span></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ACOMPANHAMENTO RESPONSÁVEL</p>
+        <h1>Meu Consumo</h1>
+        <p class="subtitle">
+          Registre suas bebidas e acompanhe uma estimativa da quantidade de álcool consumida.
+        </p>
       </div>
-      <nav>
-        <button data-page="dashboard" class="nav-btn active">🏠 Painel</button>
-        <button data-page="participants" class="nav-btn">👥 Participantes</button>
-        <button data-page="meetings" class="nav-btn">📅 Encontros</button>
-        <button data-page="attendance" class="nav-btn">✅ Presença</button>
-        <button data-page="calendar" class="nav-btn">🗓️ Calendário</button>
-        <button data-page="reports" class="nav-btn">📊 Relatórios</button>
-      </nav>
-      <button id="logoutBtn" class="nav-btn logout">↪ Sair</button>
-    </aside>
+
+      <div class="header-actions">
+        <button id="installAppBtn" class="btn btn-ghost hidden" type="button">Instalar aplicativo</button>
+        <button id="newOccasionBtn" class="btn btn-primary" type="button">Iniciar nova ocasião</button>
+      </div>
+    </header>
 
     <main>
-      <header class="topbar">
+      <section class="warning-banner" aria-label="Aviso importante">
+        <div class="warning-icon">!</div>
         <div>
-          <h1 id="pageTitle">Painel</h1>
-          <p id="todayText"></p>
-        </div>
-        <button id="installBtn" class="btn secondary hidden">Instalar aplicativo</button>
-      </header>
-
-      <section id="dashboard" class="page active">
-        <div class="hero">
-          <div>
-            <span class="eyebrow">GESTÃO DE VOLUNTÁRIOS</span>
-            <h2>Bem-vindo ao Presença GPE</h2>
-            <p>Acompanhe os encontros, registre presenças e visualize a participação mensal.</p>
-          </div>
-          <div class="hero-actions">
-            <button class="btn primary shortcut" data-target="attendance">Registrar presença</button>
-            <button class="btn light shortcut" data-target="participants">Cadastrar participante</button>
-          </div>
-        </div>
-
-        <div id="statsGrid" class="stats-grid"></div>
-
-        <div class="grid-two">
-          <article class="card">
-            <div class="card-header"><h3>Próximos encontros</h3></div>
-            <div id="upcomingMeetings"></div>
-          </article>
-          <article class="card">
-            <div class="card-header"><h3>Alertas</h3></div>
-            <div id="alertsList"></div>
-          </article>
+          <strong>Estimativa, não medição clínica.</strong>
+          <p>
+            Os resultados não indicam que alguém esteja apto a dirigir, trabalhar ou operar máquinas.
+          </p>
         </div>
       </section>
 
-      <section id="participants" class="page">
-        <div class="section-head">
-          <div><h2>Participantes</h2><p>Professores e voluntários ativos no GPE.</p></div>
-          <button id="openParticipantModal" class="btn primary">+ Novo participante</button>
+      <section class="occasion-toolbar card">
+        <div>
+          <span class="label">Ocasião atual</span>
+          <strong id="occasionNameDisplay">Nenhuma ocasião iniciada</strong>
+          <small id="occasionStatusText">Clique em “Iniciar nova ocasião” para começar.</small>
         </div>
-        <div class="card filters">
-          <input id="participantSearch" placeholder="Buscar por nome..." />
-          <select id="participantCategoryFilter">
-            <option value="">Todas as categorias</option>
-            <option>Professor</option>
-            <option>Voluntário</option>
-          </select>
-          <select id="participantStatusFilter">
-            <option value="">Todos os status</option>
-            <option>Ativo</option>
-            <option>Inativo</option>
-          </select>
-        </div>
-        <div id="participantsTable"></div>
-      </section>
 
-      <section id="meetings" class="page">
-        <div class="section-head">
-          <div><h2>Encontros</h2><p>Cadastre os sábados e atividades especiais.</p></div>
-          <div>
-            <button id="suggestSaturdaysBtn" class="btn secondary">Sugerir sábados</button>
-            <button id="openMeetingModal" class="btn primary">+ Novo encontro</button>
-          </div>
+        <div class="timer-box">
+          <span>Tempo decorrido</span>
+          <strong id="occasionTimer">00:00:00</strong>
         </div>
-        <div id="meetingsTable"></div>
-      </section>
 
-      <section id="attendance" class="page">
-        <div class="section-head">
-          <div><h2>Registro de presença</h2><p>Selecione um encontro e marque a situação de cada participante.</p></div>
-          <button id="markAllPresentBtn" class="btn secondary">Marcar todos presentes</button>
-        </div>
-        <div class="card attendance-controls">
-          <select id="attendanceMeetingSelect"></select>
-          <input id="attendanceSearch" placeholder="Buscar participante..." />
-          <select id="attendanceCategoryFilter">
-            <option value="">Professores e voluntários</option>
-            <option>Professor</option>
-            <option>Voluntário</option>
-          </select>
-        </div>
-        <div id="attendanceList" class="attendance-list"></div>
-        <div class="sticky-actions">
-          <button id="clearAttendanceBtn" class="btn danger-outline">Limpar marcações</button>
-          <button id="saveAttendanceBtn" class="btn primary">Salvar presença</button>
+        <div class="toolbar-actions">
+          <button id="addDrinkBtn" class="btn btn-primary" type="button" disabled>+ Adicionar bebida</button>
+          <button id="finishOccasionBtn" class="btn btn-danger" type="button" disabled>Finalizar ocasião</button>
         </div>
       </section>
 
-      <section id="calendar" class="page">
-        <div class="section-head">
-          <div><h2>Calendário mensal</h2><p>Visualize os encontros e o andamento das presenças.</p></div>
-          <input id="calendarMonth" type="month" />
-        </div>
-        <div id="calendarGrid" class="calendar-grid"></div>
-      </section>
+      <section class="metrics-grid" aria-label="Indicadores">
+        <article class="metric-card">
+          <span>Bebidas</span>
+          <strong id="metricDrinks">0</strong>
+          <small>unidades registradas</small>
+        </article>
 
-      <section id="reports" class="page">
-        <div class="section-head">
-          <div><h2>Relatório mensal</h2><p>Indicadores e ranking de participação.</p></div>
-          <div>
-            <input id="reportMonth" type="month" />
-            <button id="exportCsvBtn" class="btn secondary">Exportar CSV</button>
-            <button id="printBtn" class="btn primary">Imprimir / PDF</button>
-          </div>
-        </div>
-        <div id="reportStats" class="stats-grid"></div>
-        <div class="grid-two">
-          <article class="card">
-            <h3>Presença por encontro</h3>
-            <div id="meetingBars" class="bars"></div>
-          </article>
-          <article class="card">
-            <h3>Professores x voluntários</h3>
-            <div id="categoryBars" class="bars"></div>
-          </article>
-        </div>
-        <article class="card">
-          <h3>Ranking de participação</h3>
-          <div id="rankingTable"></div>
+        <article class="metric-card">
+          <span>Volume total</span>
+          <strong id="metricVolume">0 ml</strong>
+          <small>somatório das bebidas</small>
+        </article>
+
+        <article class="metric-card">
+          <span>Álcool puro</span>
+          <strong id="metricPureAlcohol">0 ml</strong>
+          <small id="metricPureAlcoholGrams">0 g</small>
+        </article>
+
+        <article class="metric-card">
+          <span>Doses padrão</span>
+          <strong id="metricStandardDrinks">0</strong>
+          <small id="standardDoseLabel">considerando 14 g</small>
+        </article>
+
+        <article class="metric-card">
+          <span>Calorias</span>
+          <strong id="metricCalories">0 kcal</strong>
+          <small>estimativa aproximada</small>
+        </article>
+
+        <article class="metric-card attention-card" id="attentionCard">
+          <span>Nível de atenção</span>
+          <strong id="metricAttention">Sem registro</strong>
+          <small id="metricAttentionHint">Adicione uma bebida para calcular.</small>
         </article>
       </section>
+
+      <section class="content-grid">
+        <div class="main-column">
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">REGISTROS</p>
+                <h2>Bebidas consumidas</h2>
+              </div>
+              <button id="addDrinkSecondaryBtn" class="btn btn-secondary" type="button" disabled>
+                Adicionar bebida
+              </button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bebida</th>
+                    <th>Volume</th>
+                    <th>Teor</th>
+                    <th>Qtd.</th>
+                    <th>Álcool puro</th>
+                    <th>Horário</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="drinksTableBody">
+                  <tr class="empty-row">
+                    <td colspan="7">Nenhuma bebida registrada.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">RESUMO</p>
+                <h2>Resumo da ocasião</h2>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <div><span>Primeira bebida</span><strong id="summaryFirstDrink">—</strong></div>
+              <div><span>Última bebida</span><strong id="summaryLastDrink">—</strong></div>
+              <div><span>Tempo total</span><strong id="summaryDuration">00:00</strong></div>
+              <div><span>Total de bebidas</span><strong id="summaryDrinkCount">0</strong></div>
+              <div><span>Volume total</span><strong id="summaryVolume">0 ml</strong></div>
+              <div><span>Álcool puro</span><strong id="summaryPureAlcohol">0 ml</strong></div>
+              <div><span>Álcool em gramas</span><strong id="summaryAlcoholGrams">0 g</strong></div>
+              <div><span>Doses padrão</span><strong id="summaryStandardDrinks">0</strong></div>
+              <div><span>Calorias</span><strong id="summaryCalories">0 kcal</strong></div>
+            </div>
+          </section>
+
+          <section class="charts-grid">
+            <article class="card chart-card">
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">GRÁFICO</p>
+                  <h2>Consumo por categoria</h2>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </article>
+
+            <article class="card chart-card">
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">GRÁFICO</p>
+                  <h2>Álcool acumulado</h2>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="timelineChart"></canvas>
+              </div>
+            </article>
+          </section>
+        </div>
+
+        <aside class="side-column">
+          <section class="card section-card">
+            <div class="section-header compact">
+              <div>
+                <p class="eyebrow">BEM-ESTAR</p>
+                <h2>Água e alimentação</h2>
+              </div>
+            </div>
+
+            <div class="wellness-counter">
+              <div>
+                <span>Copos de água</span>
+                <strong id="waterCount">0</strong>
+              </div>
+              <div class="counter-actions">
+                <button id="removeWaterBtn" class="icon-btn" type="button" aria-label="Remover copo de água">−</button>
+                <button id="addWaterBtn" class="icon-btn" type="button" aria-label="Adicionar copo de água">+</button>
+              </div>
+            </div>
+
+            <label class="checkbox-line">
+              <input id="foodCheckbox" type="checkbox" />
+              <span>Registrei alimentação nesta ocasião</span>
+            </label>
+
+            <label class="field">
+              <span>Observação sobre alimentação</span>
+              <textarea id="foodNotes" rows="3" placeholder="Ex.: jantar, lanche, churrasco..."></textarea>
+            </label>
+
+            <div id="hydrationReminder" class="hydration-reminder">
+              Beba água ao longo da ocasião.
+            </div>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-header compact">
+              <div>
+                <p class="eyebrow">CONFIGURAÇÕES</p>
+                <h2>Dose padrão</h2>
+              </div>
+            </div>
+
+            <label class="field">
+              <span>Gramas de álcool por dose</span>
+              <input id="standardDoseInput" type="number" min="1" max="30" step="0.1" value="14" />
+            </label>
+
+            <p class="helper-text">
+              Este valor varia conforme a referência utilizada. O padrão inicial deste aplicativo é 14 g.
+            </p>
+          </section>
+
+          <section class="card section-card alert-panel" id="safetyAlertPanel">
+            <div class="section-header compact">
+              <div>
+                <p class="eyebrow">SEGURANÇA</p>
+                <h2 id="safetyAlertTitle">Atenção</h2>
+              </div>
+            </div>
+            <p id="safetyAlertText">
+              Esta ferramenta apresenta apenas uma estimativa baseada nas informações cadastradas.
+            </p>
+          </section>
+        </aside>
+      </section>
+
+      <section class="card section-card history-section">
+        <div class="section-header history-header">
+          <div>
+            <p class="eyebrow">HISTÓRICO</p>
+            <h2>Ocasiões finalizadas</h2>
+          </div>
+
+          <div class="history-actions">
+            <select id="historyFilter" aria-label="Filtrar histórico">
+              <option value="all">Todos</option>
+              <option value="today">Hoje</option>
+              <option value="7days">Últimos 7 dias</option>
+              <option value="30days">Últimos 30 dias</option>
+              <option value="month">Este mês</option>
+              <option value="custom">Período personalizado</option>
+            </select>
+            <input id="historyStartDate" class="hidden" type="date" aria-label="Data inicial" />
+            <input id="historyEndDate" class="hidden" type="date" aria-label="Data final" />
+            <button id="exportCsvBtn" class="btn btn-secondary" type="button">Exportar CSV</button>
+            <button id="clearDataBtn" class="btn btn-danger-outline" type="button">Apagar dados</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Ocasião</th>
+                <th>Bebidas</th>
+                <th>Álcool puro</th>
+                <th>Doses padrão</th>
+                <th>Duração</th>
+                <th>Atenção</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr class="empty-row">
+                <td colspan="7">Nenhuma ocasião finalizada.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
+
+    <footer>
+      <strong>Aviso obrigatório</strong>
+      <p>
+        Os cálculos apresentados são apenas estimativas e não devem ser utilizados para determinar
+        se uma pessoa está apta a dirigir, trabalhar, operar máquinas ou tomar decisões importantes.
+        A absorção do álcool varia conforme peso, sexo, alimentação, medicamentos, velocidade do
+        consumo, condições de saúde e outros fatores.
+      </p>
+    </footer>
   </div>
 
-  <dialog id="participantModal">
-    <form id="participantForm" class="modal-form">
-      <div class="modal-head"><h2 id="participantModalTitle">Novo participante</h2><button type="button" class="icon-btn close-dialog">✕</button></div>
-      <input type="hidden" id="participantId" />
-      <div class="form-grid">
-        <label class="span-2">Nome completo<input id="participantName" required /></label>
-        <label>Categoria<select id="participantCategory" required><option>Professor</option><option>Voluntário</option></select></label>
-        <label>Área de atuação<select id="participantArea"></select></label>
-        <label>Telefone<input id="participantPhone" /></label>
-        <label>E-mail<input id="participantEmail" type="email" /></label>
-        <label>Data de entrada<input id="participantEntryDate" type="date" required /></label>
-        <label>Status<select id="participantStatus"><option>Ativo</option><option>Inativo</option></select></label>
-        <label class="span-2">Observações<textarea id="participantNotes" rows="3"></textarea></label>
+  <dialog id="occasionDialog" class="modal">
+    <form id="occasionForm" method="dialog" class="modal-content">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">NOVA OCASIÃO</p>
+          <h2>Iniciar acompanhamento</h2>
+        </div>
+        <button class="close-btn" type="button" data-close="occasionDialog" aria-label="Fechar">×</button>
       </div>
-      <div class="modal-actions"><button type="button" class="btn secondary close-dialog">Cancelar</button><button class="btn primary">Salvar</button></div>
+
+      <label class="field">
+        <span>Nome da ocasião</span>
+        <input id="occasionNameInput" type="text" maxlength="60" placeholder="Ex.: Churrasco de sábado" required />
+      </label>
+
+      <label class="field">
+        <span>Data e hora de início</span>
+        <input id="occasionStartInput" type="datetime-local" required />
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-close="occasionDialog">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Iniciar ocasião</button>
+      </div>
     </form>
   </dialog>
 
-  <dialog id="meetingModal">
-    <form id="meetingForm" class="modal-form">
-      <div class="modal-head"><h2 id="meetingModalTitle">Novo encontro</h2><button type="button" class="icon-btn close-dialog">✕</button></div>
-      <input type="hidden" id="meetingId" />
-      <div class="form-grid">
-        <label>Data<input id="meetingDate" type="date" required /></label>
-        <label>Status<select id="meetingStatus"><option>Agendado</option><option>Realizado</option><option>Cancelado</option></select></label>
-        <label>Horário de início<input id="meetingStart" type="time" value="08:00" /></label>
-        <label>Horário de término<input id="meetingEnd" type="time" value="12:00" /></label>
-        <label class="span-2">Tema ou atividade<input id="meetingTheme" required /></label>
-        <label class="span-2">Responsável<input id="meetingResponsible" /></label>
-        <label class="span-2">Observações<textarea id="meetingNotes" rows="3"></textarea></label>
+  <dialog id="drinkDialog" class="modal">
+    <form id="drinkForm" method="dialog" class="modal-content large">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">REGISTRO</p>
+          <h2 id="drinkDialogTitle">Adicionar bebida</h2>
+        </div>
+        <button class="close-btn" type="button" data-close="drinkDialog" aria-label="Fechar">×</button>
       </div>
-      <div class="modal-actions"><button type="button" class="btn secondary close-dialog">Cancelar</button><button class="btn primary">Salvar</button></div>
+
+      <input id="drinkEditId" type="hidden" />
+
+      <div class="preset-grid">
+        <button class="preset-card" type="button" data-preset="askov">
+          <strong>Askov</strong>
+          <span>Destilada ou bebida mista</span>
+        </button>
+        <button class="preset-card" type="button" data-preset="skol-beats">
+          <strong>Skol Beats</strong>
+          <span>Bebida alcoólica pronta</span>
+        </button>
+        <button class="preset-card" type="button" data-preset="custom">
+          <strong>Personalizada</strong>
+          <span>Cadastre qualquer bebida</span>
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Nome da bebida</span>
+          <input id="drinkName" type="text" maxlength="60" required />
+        </label>
+
+        <label class="field">
+          <span>Categoria</span>
+          <select id="drinkCategory" required>
+            <option value="">Selecione</option>
+            <option value="Destilada">Destilada</option>
+            <option value="Bebida alcoólica mista">Bebida alcoólica mista</option>
+            <option value="Bebida pronta">Bebida pronta</option>
+            <option value="Cerveja">Cerveja</option>
+            <option value="Vinho">Vinho</option>
+            <option value="Outra">Outra</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Marca</span>
+          <input id="drinkBrand" type="text" maxlength="60" />
+        </label>
+
+        <label class="field">
+          <span>Volume da embalagem (ml)</span>
+          <input id="drinkVolume" type="number" min="1" max="5000" step="1" required />
+        </label>
+
+        <label class="field">
+          <span>Percentual de álcool (%)</span>
+          <input id="drinkAlcoholPercent" type="number" min="0.1" max="100" step="0.1" required />
+        </label>
+
+        <label class="field">
+          <span>Quantidade consumida</span>
+          <input id="drinkQuantity" type="number" min="0.1" max="100" step="0.1" value="1" required />
+        </label>
+
+        <label class="field">
+          <span>Horário de início</span>
+          <input id="drinkStartTime" type="time" required />
+        </label>
+
+        <label class="field">
+          <span>Horário de término</span>
+          <input id="drinkEndTime" type="time" required />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Observações</span>
+        <textarea id="drinkNotes" rows="3" maxlength="300" placeholder="Informações opcionais"></textarea>
+      </label>
+
+      <div class="calculation-preview">
+        <span>Estimativa deste registro</span>
+        <strong id="drinkCalculationPreview">0 ml de álcool puro</strong>
+        <small>Confira o percentual de álcool diretamente no rótulo.</small>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-close="drinkDialog">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Salvar bebida</button>
+      </div>
     </form>
   </dialog>
 
-  <script src="app.js"></script>
+  <dialog id="confirmDialog" class="modal">
+    <div class="modal-content small">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">CONFIRMAÇÃO</p>
+          <h2 id="confirmDialogTitle">Confirmar ação</h2>
+        </div>
+        <button class="close-btn" type="button" data-close="confirmDialog" aria-label="Fechar">×</button>
+      </div>
+      <p id="confirmDialogText"></p>
+      <div class="modal-actions">
+        <button id="confirmCancelBtn" class="btn btn-ghost" type="button">Cancelar</button>
+        <button id="confirmActionBtn" class="btn btn-danger" type="button">Confirmar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

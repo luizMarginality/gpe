@@ -1,49 +1,31 @@
-# Presença GPE
+# Meu Consumo
 
-Aplicativo responsivo e instalável para controle de presença de professores e voluntários.
-
-## Acesso de demonstração
-
-- E-mail: admin@gpe.org.br
-- Senha: 123456
+Aplicativo responsivo para registrar bebidas e calcular uma estimativa de álcool puro consumido.
 
 ## Como executar
 
-Por usar Service Worker/PWA, abra com um servidor local.
+1. Abra a pasta no Visual Studio Code.
+2. Instale a extensão **Live Server**.
+3. Clique com o botão direito no arquivo `index.html`.
+4. Clique em **Open with Live Server**.
 
-### Opção 1 — VS Code
+## Arquivos
 
-1. Abra a pasta no VS Code.
-2. Instale a extensão Live Server.
-3. Clique com o botão direito em `index.html`.
-4. Escolha `Open with Live Server`.
+- `index.html`: estrutura da aplicação.
+- `styles.css`: identidade visual vermelha e responsividade.
+- `app.js`: cálculos, histórico, gráficos e LocalStorage.
+- `manifest.json`: configuração PWA.
+- `service-worker.js`: cache básico para funcionamento offline.
 
-### Opção 2 — Python
+## Fórmulas
 
-No terminal, dentro da pasta:
+- Álcool puro em ml = volume × quantidade × percentual alcoólico ÷ 100
+- Álcool em gramas = álcool puro em ml × 0,789
+- Doses padrão = álcool em gramas ÷ valor configurado
+- Calorias aproximadas = álcool em gramas × 7
 
-```bash
-python -m http.server 5500
-```
+A estimativa de calorias considera somente o álcool e não inclui açúcares ou outros ingredientes.
 
-Abra `http://localhost:5500`.
+## Observação
 
-## Publicar grátis no GitHub Pages
-
-1. Crie um repositório no GitHub.
-2. Envie todos os arquivos da pasta.
-3. Acesse Settings > Pages.
-4. Em Source, escolha Deploy from a branch.
-5. Selecione a branch `main` e a pasta `/root`.
-6. Salve e aguarde o link público.
-
-## Instalar no celular
-
-1. Abra o link publicado no Chrome ou Edge.
-2. Toque em “Instalar aplicativo” ou no menu do navegador.
-3. Escolha “Adicionar à tela inicial”.
-
-## Importante
-
-Esta versão é um MVP funcional que salva os dados no navegador por meio do `localStorage`.
-Para uso com vários usuários e vários aparelhos, o próximo passo é conectar o projeto ao Supabase ou Firebase e substituir o login de demonstração por autenticação real.
+O aplicativo não calcula com precisão o nível de embriaguez e nunca deve ser usado para decidir se alguém pode dirigir, trabalhar ou operar máquinas.

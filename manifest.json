@@ -1,10 +1,19 @@
 {
-  "name": "Presença GPE",
-  "short_name": "GPE Presença",
-  "start_url": "./",
+  "name": "Meu Consumo",
+  "short_name": "Meu Consumo",
+  "description": "Aplicativo para registrar e estimar o consumo de álcool.",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f7fb",
-  "theme_color": "#12355b",
-  "description": "Controle mensal de presença de professores e voluntários do GPE.",
-  "icons": []
+  "background_color": "#10080b",
+  "theme_color": "#7f1020",
+  "lang": "pt-BR",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%237f1020'/><text x='256' y='340' text-anchor='middle' font-size='290'>🍷</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
